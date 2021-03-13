@@ -59,6 +59,8 @@ class MyGame(arcade.Window):
         self.player_sprite_list = None
         self.enemy_sprite_list = None
         self.projectile_sprite_list = None
+        self.projectile2_sprite_list = None
+        self.enemyship_sprite_list = None
 
         # Set up the player info
         self.player_sprite = None
@@ -71,6 +73,9 @@ class MyGame(arcade.Window):
         self.player_sprite_list = arcade.SpriteList()
         self.enemy_sprite_list = arcade.SpriteList()
         self.projectile_sprite_list = arcade.SpriteList()
+        self.projectile2_sprite_list = arcade.SpriteList()
+        self.enemyship_sprite_list = arcade.SpriteList()
+
 
         # Set up the player
         # Character image from kenney.nl
@@ -88,10 +93,25 @@ class MyGame(arcade.Window):
             enemy.top = random.randint(0, SCREEN_HEIGHT)
 
             self.enemy_sprite_list.append(enemy)
- 
+
+        # Set up enemyship
+        for i in range(1, ENEMY_COUNT):
+            enemyship = Enemy(":resources:images/space_shooter/playerShip2_orange.png", SPRITE_SCALING_ENEMY)
+        # Set its position to a random height and off screen right
+            enemyship.left = random.randint(0, SCREEN_WIDTH)
+            enemyship.top = random.randint(0, SCREEN_HEIGHT)
+
+            self.enemyship_sprite_list.append(enemyship)
+
         # Set up projectile
         self.projectile_sprite = arcade.Sprite(":resources:images/space_shooter/laserBlue01.png", SPRITE_SCALING_PROJECTILE)
         self.projectile_sprite_list.append(self.projectile_sprite)
+
+        # Set up projectile2
+        self.projectile2_sprite = arcade.Sprite(":resources:images/space_shooter/playerShip1_green.png", SPRITE_SCALING_PROJECTILE)
+        self.projectile2_sprite_list.append(self.projectile2_sprite)
+        
+
    
         # All sprite list
         self.all_sprites = arcade.SpriteList()
@@ -107,8 +127,11 @@ class MyGame(arcade.Window):
 
         # Call draw() on all your sprite lists below
         self.enemy_sprite_list.draw()
+        self.enemyship_sprite_list.draw()
         self.player_sprite_list.draw()
         self.projectile_sprite_list.draw()
+        self.projectile2_sprite_list.draw()
+
 
     def on_update(self, delta_time):
         """
@@ -117,12 +140,17 @@ class MyGame(arcade.Window):
         need it.
         """
         self.enemy_sprite_list.update()
+        self.enemyship_sprite_list.update()
         self.projectile_sprite_list.update()
+        self.projectile2_sprite_list.update()
 
                 # Generate a list of all sprites that collided with the player.
-        hit_list = arcade.check_for_collision_with_list(self.projectile_sprite,
+        hit_list_enemy = arcade.check_for_collision_with_list(self.projectile_sprite,
                                                         self.enemy_sprite_list)
 
+        hit_list_enemyship = arcade.check_for_collision_with_list(self.projectile2_sprite,
+                                                        self.enemyship_sprite_list)
+        hit_list = hit_list_enemy + hit_list_enemyship
         # Loop through each colliding sprite, remove it, and add to the score.
         for enemy in hit_list: 
             enemy.remove_from_sprite_lists()
@@ -169,7 +197,24 @@ class MyGame(arcade.Window):
         """
         Called when the user presses a mouse button.
         """
-        pass
+                # self.projectile_sprite.center_y = self.projectile_sprite.center_y + 5
+
+                # Create a bullet
+        self.projectile2_sprite = arcade.Sprite(":resources:images/space_shooter/playerShip1_green.png", SPRITE_SCALING_PROJECTILE)
+
+        # The image points to the right, and we want it to point up. So
+        # rotate it.
+        self.projectile2_sprite.angle = 90
+
+        # Give the bullet a speed
+        self.projectile2_sprite.change_y = BULLET_SPEED
+
+        # Position the bullet
+        self.projectile2_sprite.center_x = self.player_sprite.center_x
+        self.projectile2_sprite.bottom = self.player_sprite.top
+
+        # Add the bullet to the appropriate lists
+        self.projectile2_sprite_list.append(self.projectile2_sprite)
 
     def on_mouse_release(self, x, y, button, key_modifiers):
         """
